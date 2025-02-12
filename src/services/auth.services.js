@@ -26,6 +26,7 @@ export const saveUser = async (payload) => {
     });
     return user;
   } catch (err) {
+    console.log("Error in saveUser", err);
     return err;
   }
 };

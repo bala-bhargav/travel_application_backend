@@ -31,13 +31,13 @@ export const createUser = async (req, res, next) => {
     const url = `${env.base_url}/verify/email/?email=${email}&token=${verify_token}`;
 
     const user = {
-      first_name,
-      last_name,
+      firstName: first_name,
+      lastName: last_name,
       email,
       role,
       password: hashedPassword,
-      email_verify_token: verify_token,
-      token_send_at: new Date().toISOString(),
+      emailVerifyToken: verify_token,
+      tokenSendAt: new Date().toISOString(),
     };
 
     saveUser(user)
@@ -198,8 +198,8 @@ export const logOut = async (req, res, next) => {
 export const verifyEmail = async (req, res, next) => {
   try {
     const { email, token } = verifyEmailSchema.parse(req.query);
-    const user = await getUserByEmail(email, 'id email email_verify_token token_send_at');
-    const token_gap = checkTimeDifference(user.token_send_at);
+    const user = await getUserByEmail(email, 'id email emailVerifyToken tokenSendAt');
+    const token_gap = checkTimeDifference(user.tokenSendAt);
 
     if (token_gap > 86400000) {
       await removeVerifyToken(user.id);
@@ -207,7 +207,7 @@ export const verifyEmail = async (req, res, next) => {
     }
 
     if (user) {
-      if (token !== user.email_verify_token) {
+      if (token !== user.emailVerifyToken) {
         return next(new AppError('Invalid Token', BAD_REQUEST));
       }
 

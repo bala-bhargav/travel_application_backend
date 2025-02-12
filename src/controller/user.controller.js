@@ -22,7 +22,7 @@ export const getUsers = async (req, res, next) => {
       data: result,
     });
   } catch (error) {
-    console.log(error);
+    console.log(error.message);
     return next(new AppError('Something went wrong', INTERNAL_SERVER));
   }
 };

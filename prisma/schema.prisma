@@ -1,11 +1,6 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["typedSql"]
 }
 
 datasource db {
@@ -20,27 +15,167 @@ enum Role {
   OWNER
 }
 
+enum state {
+  pending
+  accepted
+}
+
+enum paymentState {
+  creditCard
+  upi
+  debitCard
+  masterCard
+  visaCard
+}
+
+enum genderValue {
+  male
+  female
+}
+
 model User {
-  id                   Int            @id @default(autoincrement())
-  created_at           DateTime       @default(now())
-  updated_at           DateTime       @updatedAt
-  first_name           String         @db.VarChar(255)
-  last_name            String         @db.VarChar(255)
-  email                String         @unique
-  role                 Role           @default(USER)
-  password             String         @db.VarChar(255)
-  is_verified          Boolean        @default(false)
-  email_verify_token   String?        @db.VarChar(255)
-  password_reset_token String?        @db.VarChar(255)
-  token_send_at        DateTime?
-  refresh_token        RefreshToken[]
+  id                 Int              @id @default(autoincrement())
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+  firstName          String           @db.VarChar(255)
+  lastName           String           @db.VarChar(255)
+  email              String           @unique
+  role               Role             @default(USER)
+  password           String           @db.VarChar(255)
+  isVerified         Boolean          @default(false)
+  emailVerifyToken   String?          @db.VarChar(255)
+  passwordResetToken String?          @db.VarChar(255)
+  tokenSendAt        DateTime?
+  refreshTokens      RefreshToken[]
+  payments           Payment[]
+  tickets            Ticket[]
+  bookingHistories   BookingHistory[]
+
+  @@map("users")
 }
 
 model RefreshToken {
-  id            Int      @id @default(autoincrement())
-  refresh_token String   @db.VarChar(1024)
-  created_at    DateTime @default(now())
-  updated_at    DateTime @updatedAt
-  User          User?    @relation(fields: [user_id], references: [id])
-  user_id       Int?
+  id           Int      @id @default(autoincrement())
+  refreshToken String   @db.VarChar(1024)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  user         User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId       Int?
+
+  @@map("refreshTokens")
+}
+
+model Seat {
+  id         Int         @id @default(autoincrement())
+  seatNo     String      @db.VarChar(1024)
+  status     String      @db.VarChar(1024)
+  bus        Bus?        @relation(fields: [busId], references: [id], onDelete: Cascade)
+  busId      Int?
+  travellers Traveller[]
+  tickets    Ticket[]
+
+  @@map("seats")
+}
+
+model Bus {
+  id              Int       @id @default(autoincrement())
+  busName         String    @db.VarChar(1024)
+  busNumber       String    @db.VarChar(1024)
+  seats           Seat[]
+  busType         String    @db.VarChar(1024)
+  busFuelCapacity Int
+  busAddress      String    @db.VarChar(1024)
+  busOwner        BusOwner? @relation(fields: [busOwnerId], references: [id], onDelete: Cascade)
+  busOwnerId      Int?
+  tickets         Ticket[]
+  searchBus       Search[]
+
+  @@map("buses")
+}
+
+model BusOwner {
+  id          Int    @id @default(autoincrement())
+  ownerName   String @db.VarChar(1024)
+  age         Int
+  phoneNumber String @db.VarChar(1024)
+  email       String @db.VarChar(1024)
+  buses       Bus[]
+  role        Role   @default(STAFF)
+
+  @@map("busOwners")
+}
+
+model Traveller {
+  id          Int         @id @default(autoincrement())
+  name        String      @db.VarChar(1024)
+  age         Int
+  gender      genderValue @default(male)
+  seat        Seat        @relation(fields: [seatId], references: [id], onDelete: Cascade)
+  seatId      Int
+  phoneNumber String      @db.VarChar(1024)
+  ticket      Ticket?     @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  ticketId    Int?
+
+  @@map("travellers")
+}
+
+model Stop {
+  id       Int     @id @default(autoincrement())
+  name     String  @db.VarChar(1024)
+  search   Search? @relation(fields: [searchId], references: [id], onDelete: Cascade)
+  searchId Int?
+
+  @@map("stops")
+}
+
+model Search {
+  id          Int    @id @default(autoincrement())
+  name        String @db.VarChar(1024)
+  arrival     String @db.VarChar(1024)
+  destination String @db.VarChar(1024)
+  busTimings  String @db.VarChar(1024)
+  stops       Stop[]
+  Bus         Bus?   @relation(fields: [busId], references: [id])
+  busId       Int?
+
+  @@map("searches")
+}
+
+model Payment {
+  id          Int          @id @default(autoincrement())
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      Int
+  status      state        @default(pending)
+  cost        Int
+  paymentType paymentState @default(upi)
+  tickets     Ticket[]
+
+  @@map("payments")
+}
+
+model Ticket {
+  id             Int              @id @default(autoincrement())
+  bus            Bus              @relation(fields: [busId], references: [id], onDelete: Cascade)
+  busId          Int
+  user           User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId         Int
+  seat           Seat             @relation(fields: [seatId], references: [id], onDelete: Cascade)
+  seatId         Int
+  payment        Payment          @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+  paymentId      Int
+  travellers     Traveller[]
+  bookingHistory BookingHistory[]
+
+  @@map("tickets")
+}
+
+model BookingHistory {
+  id       Int    @id @default(autoincrement())
+  ticket   Ticket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  status   state  @default(pending)
+  ticketId Int
+  userId   Int
+
+  @@map("bookingHistories")
 }

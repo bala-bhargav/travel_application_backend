@@ -11,6 +11,16 @@ import logger from './logger.js';
 
 import authRoutes from '../routes/auth.routes.js';
 import adminRoutes from '../routes/user.routes.js';
+import travellerRoutes from '../routes/traveller.routes.js';
+import busRoutes from '../routes/bus.routes.js';
+import busOwnerRoutes from '../routes/busOwner.routes.js';
+import paymentRoutes from '../routes/payment.routes.js';
+import SearchRoutes from '../routes/search.routes.js';
+import seatRoutes from '../routes/seat.routes.js';
+import stopRoutes from '../routes/stop.routes.js';
+import TicketRoutes from '../routes/ticket.routes.js';
+import bookingHistoryRoutes from '../routes/bookingHistory.routes.js';
+
 const app = express();
 
 app.use(helmet());
@@ -41,5 +51,15 @@ app.use((req, res, next) => {
 
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/admin', adminRoutes);
+app.use('/api/v1/traveller', travellerRoutes);
+app.use('/api/v1/bus', busRoutes);
+app.use('/api/v1/busOwner', busOwnerRoutes);
+app.use('/api/v1/payment', paymentRoutes);
+app.use('/api/v1/search', SearchRoutes);
+app.use('/api/v1/seat', seatRoutes);
+app.use('/api/v1/stop', stopRoutes);
+app.use('/api/v1/ticket', TicketRoutes);
+app.use('/api/v1/booking', bookingHistoryRoutes);
+
 
 export default app;
