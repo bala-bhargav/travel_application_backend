@@ -18,3 +18,39 @@ export const postBusOwner = async (req, res, next) => {
         return next(new AppError('Something went wrong', error.message));
    }
 };
+
+export const updateBusOwner = async (req,res,next) => {
+     try{
+      const {id, ...updateField} = req.body;
+      const updatedOwner = await prisma.busOwner.update({
+          where:{
+          id:id
+          },
+          data:updateField
+      })
+      return res.status(201).json({
+          status:'success',
+          data:updatedOwner
+      })
+     }
+     catch(error){
+          console.log(error.message)
+          return next(new AppError('this is the error',error.message));
+     }
+};
+
+export const deleteOwner = async (req,res,next) => {
+     try{
+       const {id} = req.body;
+       const reqDataDelete = await prisma.busOwner.delete({
+          where:{id:id}
+       })
+       return res.status(201).json({
+          status:'deleeted busOwner successfully'
+       })
+     }
+     catch(error){
+      console.log(error.message)
+      return next(new AppError('something went wrong ',error.message));
+     }
+}

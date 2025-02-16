@@ -19,3 +19,20 @@ export const postHistory = async (req,res,next) => {
      return next(new AppError('Something went wrong', error.message));
  }
 };
+
+export const deleteBookingHistory = async(req,res,next) =>{
+    try{
+      const {id} = req.body;
+      const reqdeleteBus = await prisma.bookingHistory.delete({
+        where:{id:id}
+      })
+      return res.status(201).json({
+        status:'deleted bookingHistory successfully'
+      })
+    } 
+    catch(error){
+      console.log(error.message)
+      return next(new AppError('something went wrong',error.message));
+    }
+  }
+

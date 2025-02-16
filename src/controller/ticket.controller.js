@@ -25,3 +25,38 @@ export const postTicket = async (req, res, next) => {
     return next(new AppError('Something went wrong', error.message));
   }
 };
+
+
+export const updateTicket = async (req,res,next) => {
+    try{
+       const {id, ...reqData} = req.body;
+       const updateTicketData = await prisma.ticket.update({
+        where:{id:id},
+        data:reqData
+       })
+       return res.status(201).json({
+        status:'success',
+        data:updateTicketData
+       })
+     }
+    catch(error){
+      console.log(error.message)
+      return next(new AppError('something went wrong',error.message));
+    }
+}
+
+export const deleteTicket= async (req,res,next) => {
+  try{
+    const {id} = req.body;
+    const reqDataDelete = await prisma.ticket.delete({
+       where:{id:id}
+    })
+    return res.status(201).json({
+       status:'deleted ticket successfully'
+    })
+  }
+  catch(error){
+   console.log(error.message)
+   return next(new AppError('something went wrong ',error.message));
+  }
+}

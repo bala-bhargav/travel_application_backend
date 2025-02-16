@@ -29,16 +29,12 @@ export const postSearch = async (req, res, next) => {
 export const getSearch = async (req, res, next) => {
    try{
       const {arrival,destination} = req.body;
+      const seat_status = "Available"
       console.log(arrival,destination);
-      const result = await prisma.$queryRawUnsafe('SELECT searches.id FROM searches INNER JOIN stops ON searches.id = stops.searchId WHERE searches.arrival = "Hyderabad" OR stops.name = "Hyderabad"  ')
-    //   const busData = await prisma.$queryRawUnsafe(
-    //     `SELECT buses.id, buses.busName, buses.busNumber, buses.busType
-    //      FROM buses 
-    //      WHERE buses.id IN (${result.map(() => "?").join(",")})`,
-    //     ...result
-    // );
-      console.log(result);
-      return res.status(200).json({
+      const result = await prisma.$queryRawUnsafe('SELECT DISTINCT buses.busNumber, buses.id, seats.seatNo FROM searches INNER JOIN stops ON searches.id = stops.searchId INNER JOIN seats ON searches.busId = seats.busId INNER JOIN buses ON searches.busId = buses.id WHERE (searches.arrival = ? OR EXISTS (SELECT 1 FROM stops s1 WHERE s1.searchId = searches.id AND s1.name = ?)) AND (searches.destination = ? OR EXISTS (SELECT 1 FROM stops s2 WHERE s2.searchId = searches.id AND s2.name = ?)) AND seats.status = ?',arrival,arrival,destination,destination,seat_status);
+
+        console.log(result)
+      return res.status(201).json({
         status: 'success',
         data: result
       });
@@ -48,5 +44,21 @@ export const getSearch = async (req, res, next) => {
     return next(new AppError('Something went wrong', error.message));
    }
 };
+
+export const deleteSearch= async (req,res,next) => {
+  try{
+    const {id} = req.body;
+    const reqDataDelete = await prisma.search.delete({
+       where:{id:id}
+    })
+    return res.status(201).json({
+       status:'deleeted search successfully'
+    })
+  }
+  catch(error){
+   console.log(error.message)
+   return next(new AppError('something went wrong ',error.message));
+  }
+}
 
 

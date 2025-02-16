@@ -20,6 +20,11 @@ enum state {
   accepted
 }
 
+enum vacancy {
+  available
+  occupied
+}
+
 enum paymentState {
   creditCard
   upi
@@ -68,7 +73,7 @@ model RefreshToken {
 model Seat {
   id         Int         @id @default(autoincrement())
   seatNo     String      @db.VarChar(1024)
-  status     String      @db.VarChar(1024)
+  status     vacancy      @default(available)
   bus        Bus?        @relation(fields: [busId], references: [id], onDelete: Cascade)
   busId      Int?
   travellers Traveller[]

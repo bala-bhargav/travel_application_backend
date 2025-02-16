@@ -20,3 +20,37 @@ export const postTraveller = async (req,res,next) => {
          return next(new AppError('Something went wrong', error.message));
       }
 };
+
+export const updateTraveller = async (req,res,next) => {
+  try{
+   const {id, ...reqData} = req.body;
+   const reqTravellerData = await prisma.traveller.update({
+    where:{id:id},
+    data:reqData
+   }) 
+   return res.status(201).json({
+    status:'success',
+    data:reqTravellerData
+   })
+  }
+  catch(error){
+    console.log(error.message)
+    return next(new AppError('something wemt wrong',error.message));
+  }
+}
+
+export const deleteTraveller= async (req,res,next) => {
+  try{
+    const {id} = req.body;
+    const reqDataDelete = await prisma.traveller.delete({
+       where:{id:id}
+    })
+    return res.status(201).json({
+       status:'deleted traveller successfully'
+    })
+  }
+  catch(error){
+   console.log(error.message)
+   return next(new AppError('something went wrong ',error.message));
+  }
+}

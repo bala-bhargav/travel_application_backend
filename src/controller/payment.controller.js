@@ -25,3 +25,39 @@ export const postPayment = async (req, res, next) => {
     return next(new AppError('Something went wrong', error.message));
   }
 };
+
+export const updatedPayment = async (req,res,next) => {
+  try{
+    const {id, ...updatedField} = req.body;
+    const updatedData = await prisma.payment.update({
+      where:{
+        id:id
+      },
+      data:updatedField
+    })
+    return  res.status(201).json({
+      status:'success',
+      data:updatedData
+    })
+  }
+  catch(error){
+    console.log(error.message)
+    return next(new AppError('something went wrong'),error.message);
+  }
+}
+
+export const deletePayment= async (req,res,next) => {
+  try{
+    const {id} = req.body;
+    const reqDataDelete = await prisma.payment.delete({
+       where:{id:id}
+    })
+    return res.status(201).json({
+       status:'deleeted payment successfully'
+    })
+  }
+  catch(error){
+   console.log(error.message)
+   return next(new AppError('something went wrong ',error.message));
+  }
+}
